@@ -1,0 +1,100 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Usuario {
+  id       Int    @id @default(autoincrement())
+  nombre   String
+  email    String @unique
+  password String
+}
+
+model Producto {
+  id             Int      @id @default(autoincrement())
+  codigo         String   @unique
+  nombre         String
+  precioUnitario Float
+  pesoKg         Float
+  productosPedido ProductoPedido[]
+}
+
+model Cliente {
+  id      Int      @id @default(autoincrement())
+  ci      String   @unique
+  nombre  String
+  tipo    String
+  pedidos Pedido[]
+}
+
+model Pedido {
+  id         Int      @id @default(autoincrement())
+  codigo     String   @unique
+  costoTotal Float
+  fecha      DateTime @default(now())
+
+  clienteId         Int
+  seguroId          Int
+  transportadoraId  Int
+  tasaImpositivaId  Int
+  costoFronterizoId Int?
+
+  cliente         Cliente          @relation(fields: [clienteId], references: [id])
+  seguro          Seguro           @relation(fields: [seguroId], references: [id])
+  transportadora  Transportadora   @relation(fields: [transportadoraId], references: [id])
+  tasaImpositiva  TasaImpositiva   @relation(fields: [tasaImpositivaId], references: [id])
+  costoFronterizo CostoFronterizo? @relation(fields: [costoFronterizoId], references: [id])
+
+  productosPedido ProductoPedido[]
+}
+
+model ProductoPedido {
+  id         Int      @id @default(autoincrement())
+  pedido     Pedido   @relation(fields: [pedidoId], references: [id])
+  pedidoId   Int
+  producto   Producto @relation(fields: [productoId], references: [id])
+  productoId Int
+  cantidad   Int
+  pesoKg     Float
+}
+
+model Proveedor {
+  id       Int    @id @default(autoincrement())
+  nombre   String
+  pais     String
+  contacto String
+}
+
+model Transportadora {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  contacto  String
+  costoBase Float
+  pedidos   Pedido[]
+}
+
+model Seguro {
+  id            Int      @id @default(autoincrement())
+  nombre        String
+  tipoCobertura String
+  costo         Float
+  pedidos       Pedido[]
+}
+
+model CostoFronterizo {
+  id        Int      @id @default(autoincrement())
+  tipoCosto String
+  costo     Float
+  pedidos   Pedido[]
+}
+
+model TasaImpositiva {
+  id         Int      @id @default(autoincrement())
+  nombre     String
+  porcentaje Float
+  pedidos    Pedido[]
+}
