@@ -259,7 +259,7 @@ app.get('/pedidos', async (_req: Request, res: Response) => {
       }
     });
 
-    const pedidosConResumen = pedidos.map(pedido => {
+    const pedidosConResumen = pedidos.map((pedido: any) => {
       let pesoTotal = 0;
       for (const item of pedido.productosPedido) {
         pesoTotal += item.pesoKg * item.cantidad;
@@ -327,7 +327,7 @@ app.post('/pedidos', async (req: Request, res: Response) => {
     let primerCostoId: number | null = null;
     if (aplicarCostosFronterizos) {
       const todos = await prisma.costoFronterizo.findMany();
-      costoFronterizoExtra = todos.reduce((sum, c) => sum + c.costo, 0);
+      costoFronterizoExtra = todos.reduce((sum: number, c: { costo: number }) => sum + c.costo, 0);
       if (todos.length > 0) primerCostoId = todos[0].id;
       costoTotal += costoFronterizoExtra;
     }
@@ -411,7 +411,7 @@ app.put('/pedidos/:id', async (req: Request, res: Response) => {
     let primerCostoId: number | null = null;
     if (aplicarCostosFronterizos) {
       const todos = await prisma.costoFronterizo.findMany();
-      costoFronterizoExtra = todos.reduce((sum, c) => sum + c.costo, 0);
+      costoFronterizoExtra = todos.reduce((sum: number, c: { costo: number }) => sum + c.costo, 0);
       if (todos.length > 0) primerCostoId = todos[0].id;
       costoTotal += costoFronterizoExtra;
     }
