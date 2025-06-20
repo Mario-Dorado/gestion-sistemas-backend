@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 
@@ -8,26 +8,26 @@ const prisma = new PrismaClient();
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (_req, res) => {
+app.get('/', (_req: Request, res: Response) => {
   res.send('Casa Toyosato Backend Running!');
 });
 
 //------------------------------------------------------ USUARIOS ------------------------------------------------------
 
 // Registro de usuario
-app.post('/register', async (req, res) => {
+app.post('/register', async (req: Request, res: Response) => {
   const { nombre, email, password } = req.body;
 
   if (!nombre || !email || !password) {
     res.status(400).json({ error: 'Todos los campos son obligatorios.' });
-    return 
+    return; 
   }
 
   try {
     const existe = await prisma.usuario.findUnique({ where: { email } });
     if (existe) {
       res.status(409).json({ error: 'El correo ya está registrado.' });
-      return 
+      return; 
     }
 
     const nuevo = await prisma.usuario.create({
@@ -45,20 +45,20 @@ app.post('/register', async (req, res) => {
   }
 });
 
-
 // Login de usuario
-app.post('/login', async (req, res) => {
+app.post('/login', async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
-  if (!email || !password) 
-    return 
+  if (!email || !password) {
     res.status(400).json({ error: 'Correo y contraseña requeridos.' });
+    return;
+  }
 
   try {
     const user = await prisma.usuario.findUnique({ where: { email } });
     if (!user || user.password !== password) {
       res.status(401).json({ error: 'Credenciales incorrectas.' });
-      return 
+      return; 
     }
 
     res.json({ mensaje: 'Login exitoso', usuario: { id: user.id, nombre: user.nombre, email: user.email } });
@@ -70,7 +70,7 @@ app.post('/login', async (req, res) => {
 
 //------------------------------------------------------ PRODUCTOS ------------------------------------------------------
 
-app.get('/productos', async (_req, res) => {
+app.get('/productos', async (_req: Request, res: Response) => {
   try {
     const productos = await prisma.producto.findMany();
     res.json(productos);
@@ -80,7 +80,7 @@ app.get('/productos', async (_req, res) => {
   }
 });
 
-app.post('/productos', async (req, res) => {
+app.post('/productos', async (req: Request, res: Response) => {
   const { codigo, nombre, precioUnitario, pesoKg } = req.body;
 
   if (
@@ -111,7 +111,7 @@ app.post('/productos', async (req, res) => {
   }
 });
 
-app.put('/productos/:id', async (req, res) => {
+app.put('/productos/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
   const { nombre, precioUnitario, pesoKg } = req.body;
 
@@ -138,7 +138,7 @@ app.put('/productos/:id', async (req, res) => {
 });
 
 // DELETE: Eliminar producto por ID
-app.delete('/productos/:id', async (req, res) => {
+app.delete('/productos/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
 
   if (isNaN(id)) {
@@ -159,7 +159,7 @@ app.delete('/productos/:id', async (req, res) => {
 // ------------------------------------------------------ CLIENTES ------------------------------------------------------
 
 // GET: Listar todos los clientes
-app.get('/clientes', async (_req, res) => {
+app.get('/clientes', async (_req: Request, res: Response) => {
   try {
     const clientes = await prisma.cliente.findMany();
     res.json(clientes);
@@ -170,7 +170,7 @@ app.get('/clientes', async (_req, res) => {
 });
 
 // POST: Registrar un nuevo cliente
-app.post('/clientes', async (req, res) => {
+app.post('/clientes', async (req: Request, res: Response) => {
   const { ci, nombre, tipo } = req.body;
 
   if (!ci || !nombre || !tipo) {
@@ -197,7 +197,7 @@ app.post('/clientes', async (req, res) => {
   }
 });
 
-app.put('/clientes/:id', async (req, res) => {
+app.put('/clientes/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
   const { nombre, tipo } = req.body;
 
@@ -220,7 +220,7 @@ app.put('/clientes/:id', async (req, res) => {
 });
 
 // DELETE: Eliminar cliente por ID
-app.delete('/clientes/:id', async (req, res) => {
+app.delete('/clientes/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
 
   if (isNaN(id)) {
@@ -242,7 +242,7 @@ app.delete('/clientes/:id', async (req, res) => {
 // ------------------------------------------------------ PEDIDOS ------------------------------------------------------
 
 // Obtener todos los pedidos con sus relaciones
-app.get('/pedidos', async (_req, res) => {
+app.get('/pedidos', async (_req: Request, res: Response) => {
   try {
     const pedidos = await prisma.pedido.findMany({
       include: {
@@ -281,7 +281,7 @@ app.get('/pedidos', async (_req, res) => {
 });
 
 // POST: Crear nuevo pedido
-app.post('/pedidos', async (req, res) => {
+app.post('/pedidos', async (req: Request, res: Response) => {
   const {
     codigoPedido,
     clienteId,
@@ -364,7 +364,7 @@ app.post('/pedidos', async (req, res) => {
 });
 
 // PUT: Actualizar un pedido
-app.put('/pedidos/:id', async (req, res) => {
+app.put('/pedidos/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
   const {
     codigoPedido,
@@ -451,7 +451,7 @@ app.put('/pedidos/:id', async (req, res) => {
 });
 
 // Eliminar un pedido
-app.delete('/pedidos/:id', async (req, res) => {
+app.delete('/pedidos/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
 
   try {
@@ -468,7 +468,7 @@ app.delete('/pedidos/:id', async (req, res) => {
 // ------------------------------------------------------ PROVEEDORES ------------------------------------------------------
 
 // Obtener todos los proveedores
-app.get('/proveedores', async (_req, res) => {
+app.get('/proveedores', async (_req: Request, res: Response) => {
   try {
     const proveedores = await prisma.proveedor.findMany();
     res.json(proveedores);
@@ -479,12 +479,12 @@ app.get('/proveedores', async (_req, res) => {
 });
 
 // Crear un nuevo proveedor
-app.post('/proveedores', async (req, res) => {
+app.post('/proveedores', async (req: Request, res: Response) => {
   const { nombre, pais, contacto } = req.body;
 
   if (!nombre || !pais || !contacto) {
     res.status(400).json({ error: 'Todos los campos son obligatorios' });
-    return 
+    return;
   }
 
   try {
@@ -499,13 +499,13 @@ app.post('/proveedores', async (req, res) => {
 });
 
 // Actualizar un proveedor existente
-app.put('/proveedores/:id', async (req, res) => {
+app.put('/proveedores/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
   const { nombre, pais, contacto } = req.body;
 
   if (!nombre || !pais || !contacto) {
     res.status(400).json({ error: 'Todos los campos son obligatorios para editar' });
-    return 
+    return;
   }
 
   try {
@@ -521,7 +521,7 @@ app.put('/proveedores/:id', async (req, res) => {
 });
 
 // Eliminar un proveedor
-app.delete('/proveedores/:id', async (req, res) => {
+app.delete('/proveedores/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
 
   try {
@@ -536,7 +536,7 @@ app.delete('/proveedores/:id', async (req, res) => {
 // ------------------------------------------------------ TRANSPORTADORAS ------------------------------------------------------
 
 // Obtener todas las transportadoras
-app.get('/transportadoras', async (_req, res) => {
+app.get('/transportadoras', async (_req: Request, res: Response) => {
   try {
     const transportadoras = await prisma.transportadora.findMany();
     res.json(transportadoras);
@@ -547,7 +547,7 @@ app.get('/transportadoras', async (_req, res) => {
 });
 
 // Crear una nueva transportadora
-app.post('/transportadoras', async (req, res) => {
+app.post('/transportadoras', async (req: Request, res: Response) => {
   const { nombre, contacto, costoBase } = req.body;
 
   if (!nombre || !contacto || typeof costoBase !== 'number' || costoBase <= 0) {
@@ -567,7 +567,7 @@ app.post('/transportadoras', async (req, res) => {
 });
 
 // Actualizar una transportadora
-app.put('/transportadoras/:id', async (req, res) => {
+app.put('/transportadoras/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
   const { nombre, contacto, costoBase } = req.body;
 
@@ -589,7 +589,7 @@ app.put('/transportadoras/:id', async (req, res) => {
 });
 
 // Eliminar una transportadora
-app.delete('/transportadoras/:id', async (req, res) => {
+app.delete('/transportadoras/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
 
   try {
@@ -604,7 +604,7 @@ app.delete('/transportadoras/:id', async (req, res) => {
 // ------------------------------------------------------ SEGUROS ------------------------------------------------------
 
 // Obtener todos los seguros
-app.get('/seguros', async (_req, res) => {
+app.get('/seguros', async (_req: Request, res: Response) => {
   try {
     const seguros = await prisma.seguro.findMany();
     res.json(seguros);
@@ -615,7 +615,7 @@ app.get('/seguros', async (_req, res) => {
 });
 
 // Crear un nuevo seguro
-app.post('/seguros', async (req, res) => {
+app.post('/seguros', async (req: Request, res: Response) => {
   const { nombre, tipoCobertura, costo } = req.body;
 
   if (!nombre || !tipoCobertura || typeof costo !== 'number' || costo <= 0) {
@@ -635,7 +635,7 @@ app.post('/seguros', async (req, res) => {
 });
 
 // Actualizar un seguro
-app.put('/seguros/:id', async (req, res) => {
+app.put('/seguros/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
   const { nombre, tipoCobertura, costo } = req.body;
 
@@ -657,7 +657,7 @@ app.put('/seguros/:id', async (req, res) => {
 });
 
 // Eliminar un seguro
-app.delete('/seguros/:id', async (req, res) => {
+app.delete('/seguros/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
 
   try {
@@ -672,7 +672,7 @@ app.delete('/seguros/:id', async (req, res) => {
 // ------------------------------------------------------ COSTOS FRONTERIZOS ------------------------------------------------------
 
 // Obtener todos los costos fronterizos
-app.get('/costos-fronterizos', async (_req, res) => {
+app.get('/costos-fronterizos', async (_req: Request, res: Response) => {
   try {
     const costos = await prisma.costoFronterizo.findMany();
     res.json(costos);
@@ -683,7 +683,7 @@ app.get('/costos-fronterizos', async (_req, res) => {
 });
 
 // Crear un nuevo costo fronterizo
-app.post('/costos-fronterizos', async (req, res) => {
+app.post('/costos-fronterizos', async (req: Request, res: Response) => {
   const { tipoCosto, costo } = req.body;
 
   if (!tipoCosto || typeof costo !== 'number' || costo <= 0) {
@@ -703,7 +703,7 @@ app.post('/costos-fronterizos', async (req, res) => {
 });
 
 // Actualizar un costo fronterizo
-app.put('/costos-fronterizos/:id', async (req, res) => {
+app.put('/costos-fronterizos/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
   const { tipoCosto, costo } = req.body;
 
@@ -725,7 +725,7 @@ app.put('/costos-fronterizos/:id', async (req, res) => {
 });
 
 // Eliminar un costo fronterizo
-app.delete('/costos-fronterizos/:id', async (req, res) => {
+app.delete('/costos-fronterizos/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
 
   try {
@@ -740,7 +740,7 @@ app.delete('/costos-fronterizos/:id', async (req, res) => {
 // ------------------------------------------------------ TASAS IMPOSITIVAS ------------------------------------------------------
 
 // Obtener todas las tasas impositivas
-app.get('/tasas-impositivas', async (_req, res) => {
+app.get('/tasas-impositivas', async (_req: Request, res: Response) => {
   try {
     const tasas = await prisma.tasaImpositiva.findMany();
     res.json(tasas);
@@ -751,7 +751,7 @@ app.get('/tasas-impositivas', async (_req, res) => {
 });
 
 // Crear una nueva tasa impositiva
-app.post('/tasas-impositivas', async (req, res) => {
+app.post('/tasas-impositivas', async (req: Request, res: Response) => {
   const { nombre, porcentaje } = req.body;
 
   if (!nombre || typeof porcentaje !== 'number' || porcentaje <= 0) {
@@ -771,7 +771,7 @@ app.post('/tasas-impositivas', async (req, res) => {
 });
 
 // Actualizar una tasa impositiva
-app.put('/tasas-impositivas/:id', async (req, res) => {
+app.put('/tasas-impositivas/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
   const { nombre, porcentaje } = req.body;
 
@@ -793,7 +793,7 @@ app.put('/tasas-impositivas/:id', async (req, res) => {
 });
 
 // Eliminar una tasa impositiva
-app.delete('/tasas-impositivas/:id', async (req, res) => {
+app.delete('/tasas-impositivas/:id', async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
 
   try {
